@@ -1,6 +1,5 @@
-const LoadScript = {
-  install: function (Vue) {
-    Vue.loadScript = Vue.prototype.$loadScript = function (src) { // eslint-disable-line no-param-reassign
+function loadScript(src) {
+      // eslint-disable-line no-param-reassign
       return new Promise(function (resolve, reject) {
         let shouldAppend = false;
         let el = document.querySelector('script[src="' + src + '"]');
@@ -10,8 +9,7 @@ const LoadScript = {
           el.async = true;
           el.src = src;
           shouldAppend = true;
-        }
-        else if (el.hasAttribute('data-loaded')) {
+        } else if (el.hasAttribute('data-loaded')) {
           resolve(el);
           return;
         }
@@ -27,21 +25,29 @@ const LoadScript = {
       });
     };
 
-    Vue.unloadScript = Vue.prototype.$unloadScript = function (src) { // eslint-disable-line no-param-reassign
-      return new Promise(function (resolve, reject) {
-        const el = document.querySelector('script[src="' + src + '"]');
+function unloadScript(src) {
+  // eslint-disable-line no-param-reassign
+  return new Promise(function (resolve, reject) {
+    const el = document.querySelector('script[src="' + src + '"]');
 
-        if (!el) {
-          reject();
-          return;
-        }
+    if (!el) {
+      reject();
+      return;
+    }
 
-        document.head.removeChild(el);
+    document.head.removeChild(el);
 
-        resolve();
-      });
-    };
+    resolve();
+  });
+}
+
+export { unloadScript, loadScript };
+
+const thisLoadScript = {
+  install: function (app) {
+    app.config.globalProperties.$loadScript = loadScript;
+    app.config.globalProperties.$unloadScript = unloadScript;
   },
 };
 
-export default LoadScript;
+export default thisLoadScript;
